@@ -1,0 +1,37 @@
+{
+  "name": "tourze/phpunit-symfony-unit-test",
+  "description": "",
+  "type": "library",
+  "homepage": "https://github.com/tourze/phpunit-symfony-unit-test",
+  "license": "MIT",
+  "require": {
+    "composer-runtime-api": "^2.0",
+    "doctrine/orm": "^3.0",
+    "league/construct-finder": "^1.5",
+    "monolog/monolog": "^3.1",
+    "psr/log": "^3|^2|^1",
+    "symfony/dependency-injection": "^7.3",
+    "symfony/event-dispatcher-contracts": "^3",
+    "symfony/http-kernel": "^7.3",
+    "tourze/symfony-dependency-service-loader": "0.0.*"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^11.5",
+    "tourze/enum-extra": "0.1.*",
+    "tourze/phpunit-base": "1.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tourze\\PHPUnitSymfonyUnitTest\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tourze\\PHPUnitSymfonyUnitTest\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "release-version": "0.1.*"
+  }
+}

@@ -2,15 +2,12 @@
 
 namespace Tourze\PHPUnitSymfonyUnitTest;
 
-use Doctrine\ORM\Mapping as ORM;
 use League\ConstructFinder\ConstructFinder;
-use Monolog\Attribute\WithMonologChannel;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Tourze\PHPUnitBase\TestCaseHelper;
 use Tourze\SymfonyDependencyServiceLoader\AutoExtension;
 
@@ -24,22 +21,19 @@ abstract class AbstractDependencyInjectionExtensionTestCase extends TestCase
     {
         $reflection = new \ReflectionClass($this);
         $this->assertEmpty(
-            $reflection->getAttributes('PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses'),
+            $reflection->getAttributes(RunTestsInSeparateProcesses::class),
             get_class($this) . '这个测试用例，不应使用 RunTestsInSeparateProcesses 注解'
         );
     }
 
-    /**
-     * 要求所有的基类都要继承 \Tourze\SymfonyDependencyServiceLoader\AutoExtension，以统计加载逻辑
-     */
     #[Test]
     final public function testExtendsCorrectBaseClass(): void
     {
         $className = TestCaseHelper::extractCoverClass(new \ReflectionClass($this));
         $this->assertNotNull($className, '请使用 \PHPUnit\Framework\Attributes\CoversClass 注解声明当前的测试目标类');
         $this->assertTrue(
-            is_subclass_of($className, 'Tourze\SymfonyDependencyServiceLoader\AutoExtension'),
-            "{$className}必须继承Tourze\\SymfonyDependencyServiceLoader\\AutoExtension"
+            is_subclass_of($className, AutoExtension::class),
+            "{$className}必须继承" . AutoExtension::class,
         );
     }
 

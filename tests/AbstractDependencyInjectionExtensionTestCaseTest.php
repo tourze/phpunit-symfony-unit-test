@@ -73,6 +73,7 @@ class AbstractDependencyInjectionExtensionTestCaseTest extends TestCase
             'EventSubscriber',
             'MessageHandler',
             'Procedure',
+            'Twig',
         ];
 
         $this->assertSame($expectedDirectories, $directories);

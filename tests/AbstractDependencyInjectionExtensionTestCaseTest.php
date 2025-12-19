@@ -40,6 +40,7 @@ class AbstractDependencyInjectionExtensionTestCaseTest extends TestCase
         $reflection = new \ReflectionClass(AbstractDependencyInjectionExtensionTestCase::class);
 
         $this->assertTrue($reflection->hasMethod('testShouldNotHaveRunTestsInSeparateProcesses'));
+        $this->assertTrue($reflection->hasMethod('testTestCaseMustBeFinal'));
         $this->assertTrue($reflection->hasMethod('testExtendsCorrectBaseClass'));
         $this->assertTrue($reflection->hasMethod('testLoadShouldRegisterServices'));
         $this->assertTrue($reflection->hasMethod('testServiceInjectedLoggerMustUseWithMonologChannelAttribute'));

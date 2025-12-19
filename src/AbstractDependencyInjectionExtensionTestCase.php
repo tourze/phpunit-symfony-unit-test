@@ -27,6 +27,16 @@ abstract class AbstractDependencyInjectionExtensionTestCase extends TestCase
     }
 
     #[Test]
+    final public function testTestCaseMustBeFinal(): void
+    {
+        $reflection = new \ReflectionClass($this);
+        $this->assertTrue(
+            $reflection->isFinal(),
+            get_class($this) . '测试类必须声明为 final'
+        );
+    }
+
+    #[Test]
     final public function testExtendsCorrectBaseClass(): void
     {
         $className = TestCaseHelper::extractCoverClass(new \ReflectionClass($this));
@@ -51,6 +61,22 @@ abstract class AbstractDependencyInjectionExtensionTestCase extends TestCase
         yield 'EventSubscriber';
         yield 'MessageHandler';
         yield 'Procedure';
+        yield 'Twig';
+    }
+
+    /**
+     * 有一些固定的目录，不能被注册为服务
+     *
+     * @return iterable<string>
+     */
+    protected function provideNonServiceDirectories(): iterable
+    {
+        yield 'Entity';
+        yield 'DependencyInjection';
+        yield 'Request';
+        yield 'Param';
+        yield 'Result';
+        yield 'Exception';
     }
 
     /**
@@ -91,6 +117,59 @@ abstract class AbstractDependencyInjectionExtensionTestCase extends TestCase
                 }
 
                 $this->assertTrue($container->hasDefinition($construct->name()), "应该注册 {$construct->name()} 服务，请检查服务配置文件");
+            }
+        }
+    }
+
+    /**
+     * 一些固定目录不应该被注册为服务（避免误扫全量目录）
+     */
+    #[Test]
+    final public function testLoadShouldNotRegisterServicesInNonServiceDirectories(): void
+    {
+        $className = TestCaseHelper::extractCoverClass(new \ReflectionClass($this));
+        $this->assertNotNull($className, '请使用 \PHPUnit\Framework\Attributes\CoversClass 注解声明当前的测试目标类');
+        /** @var class-string $className */
+        $reflection = new \ReflectionClass($className);
+
+        $extension = new $className();
+        $this->assertInstanceOf(Extension::class, $extension);
+
+        $container = new ContainerBuilder();
+        $container->setParameter('kernel.environment', 'test');
+
+        $extension->load([], $container);
+
+        // Assert - 检查扩展加载成功
+        $this->assertTrue($container->isTrackingResources());
+
+        $fileName = $reflection->getFileName();
+        $this->assertIsString($fileName);
+        $sourceDir = \dirname(\dirname($fileName));
+
+        $registeredServiceClasses = [];
+        foreach ($container->getDefinitions() as $id => $definition) {
+            $class = $definition->getClass();
+            if (!is_string($class) && (class_exists($id) || interface_exists($id))) {
+                $class = $id;
+            }
+            if (is_string($class)) {
+                $registeredServiceClasses[$class] = true;
+            }
+        }
+
+        foreach ($this->provideNonServiceDirectories() as $serviceDir) {
+            if (!is_dir("{$sourceDir}/{$serviceDir}")) {
+                continue;
+            }
+
+            $constructs = ConstructFinder::locatedIn("{$sourceDir}/{$serviceDir}")->findClasses();
+            foreach ($constructs as $construct) {
+                $this->assertArrayNotHasKey(
+                    $construct->name(),
+                    $registeredServiceClasses,
+                    "不应注册 {$construct->name()} 服务，请检查服务配置文件"
+                );
             }
         }
     }
